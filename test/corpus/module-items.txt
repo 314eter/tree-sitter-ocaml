@@ -16,9 +16,9 @@ val x : 'a . 'a
       (type_constructor)))
   (value_specification
     (value_name)
-    type: (polymorphic_type
-      (type_variable)
-      type: (type_variable))))
+    (polymorphic_variables
+      (type_variable))
+    type: (type_variable)))
 
 ==============================
 External
@@ -40,9 +40,9 @@ external x : 'a . 'a = "x" {|x|}
       (string_content)))
   (external
     (value_name)
-    type: (polymorphic_type
-      (type_variable)
-      type: (type_variable))
+    (polymorphic_variables
+      (type_variable))
+    type: (type_variable)
     (string
       (string_content))
     (quoted_string
@@ -184,7 +184,6 @@ type t = t = ..
       name: (type_constructor)
       synonym: (type_constructor_path
         (type_constructor)))))
-
 
 ==============================
 Exception definition

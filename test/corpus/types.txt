@@ -286,8 +286,9 @@ type t = a:t * t -> t
     (type_binding
       name: (type_constructor)
       body: (function_type
-        domain: (polymorphic_type
-          (type_variable)
+        domain: (polymorphic_argument_type
+          (polymorphic_variables
+            (type_variable))
           type: (function_type
             domain: (type_variable)
             codomain: (type_constructor_path
@@ -295,8 +296,9 @@ type t = a:t * t -> t
         codomain: (function_type
           domain: (labeled_argument_type
             (label_name)
-            type: (polymorphic_type
-              (type_variable)
+            type: (polymorphic_argument_type
+              (polymorphic_variables
+                (type_variable))
               type: (function_type
                 domain: (type_variable)
                 codomain: (type_constructor_path
@@ -304,8 +306,9 @@ type t = a:t * t -> t
           codomain: (function_type
             domain: (labeled_argument_type
               (label_name)
-              type: (polymorphic_type
-                (type_variable)
+              type: (polymorphic_argument_type
+                (polymorphic_variables
+                  (type_variable))
                 type: (function_type
                   domain: (type_variable)
                   codomain: (type_constructor_path
