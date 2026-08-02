@@ -239,7 +239,12 @@ export default grammar({
 
     _signature: $ => choice(
       repeat1(';;'),
-      seq(repeat1(seq(repeat(';;'), $._signature_item)), repeat(';;')),
+      seq($._at_at_modality, repeat(';;')),
+      seq(
+        optional($._at_at_modality),
+        repeat1(seq(repeat(';;'), $._signature_item)),
+        repeat(';;'),
+      ),
     ),
 
     // Toplevel
@@ -370,6 +375,7 @@ export default grammar({
       optional($._attribute),
       $._value_name,
       $._polymorphic_typed,
+      optional($._at_at_modality),
       '=',
       repeat1(choice($.string, $.quoted_string)),
       repeat($.item_attribute),
@@ -451,7 +457,10 @@ export default grammar({
     ),
 
     _constructor_argument: $ => choice(
-      sep1('*', seq(optional('global_'), $._simple_type)),
+      sep1(
+        '*',
+        seq(optional('global_'), $._simple_type, optional($._at_at_modality)),
+      ),
       $.record_declaration,
     ),
 
@@ -465,7 +474,8 @@ export default grammar({
     field_declaration: $ => seq(
       optional(choice('mutable', 'global_')),
       $._field_name,
-      $._maybe_polymorphic_typed,
+      $._polymorphic_typed,
+      optional($._at_at_modality),
     ),
 
     external_declaration: $ => seq(
@@ -495,7 +505,10 @@ export default grammar({
     module_binding: $ => seq(
       choice(
         $._module_name,
-        parenthesize(seq($._module_name, $._at_mode)),
+        parenthesize(seq(
+          $._module_name,
+          choice($._at_mode, $._at_at_modality),
+        )),
       ),
       repeat($.module_parameter),
       choice(
@@ -508,6 +521,7 @@ export default grammar({
         seq($._module_typed, optional($._at_mode)),
         seq(':=', field('body', $.extended_module_path)),
       ),
+      optional($._at_at_modality),
       repeat($.item_attribute),
     ),
 
@@ -537,6 +551,7 @@ export default grammar({
       $._include_or_include_functor,
       optional($._attribute),
       field('module', $._module_expression),
+      optional($._at_at_modality),
       repeat($.item_attribute),
     ),
 
@@ -600,7 +615,8 @@ export default grammar({
       'val',
       optional($._attribute),
       $._value_name,
-      $._maybe_polymorphic_typed,
+      $._polymorphic_typed,
+      optional($._at_at_modality),
       repeat($.item_attribute),
     ),
 
@@ -617,6 +633,7 @@ export default grammar({
       optional($._attribute),
       field('module_type', $._module_type),
       repeat($.item_attribute),
+      optional($._at_at_modality),
     ),
 
     // Module types
@@ -2311,6 +2328,8 @@ export default grammar({
 
     _at_mode: $ => seq('@', field('mode', repeat1($._mode))),
 
+    _at_at_modality: $ => seq('@@', field('modality', repeat1($._modality))),
+
     // Names
 
     _value_name: $ => choice(
@@ -2383,6 +2402,7 @@ export default grammar({
     ),
     _instance_variable_name: $ => alias($._lowercase_identifier, $.instance_variable_name),
     _mode: $ => alias($._lowercase_identifier, $.mode),
+    _modality: $ => alias($._lowercase_identifier, $.modality),
 
     _simple_module_name: $ => alias($._uppercase_identifier, $.module_name),
     _module_name: $ => choice(
