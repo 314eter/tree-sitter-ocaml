@@ -23,6 +23,14 @@ export default grammar({
   inline: $ => [
     $._parameter,
     $._argument,
+    $._module_typed,
+    $._typed,
+    $._strictly_polymorphic_typed,
+    $._polymorphic_typed,
+    $._coerced,
+    $._type_constrained,
+    $._polymorphic_type,
+    $._inline_type,
     $._argument_type,
     $._inline_expression,
     $._extension,
@@ -893,7 +901,7 @@ export default grammar({
 
     // Types
 
-    _typed: $ => seq(':', field('type', $._type)),
+    _typed: $ => seq(':', field('type', $._inline_type)),
 
     _simple_typed: $ => seq(':', field('type', $._simple_type)),
 
@@ -904,7 +912,7 @@ export default grammar({
       $._strictly_polymorphic_typed,
     ),
 
-    _coerced: $ => seq(':>', field('coercion', $._type)),
+    _coerced: $ => seq(':>', field('coercion', $._inline_type)),
 
     _type_constrained: $ => choice(
       seq($._typed, optional($._coerced)),
@@ -914,7 +922,7 @@ export default grammar({
     _polymorphic_type: $ => seq(
       $.polymorphic_variables,
       '.',
-      field('type', $._type),
+      field('type', $._inline_type),
     ),
 
     polymorphic_variables: $ => choice(
@@ -947,7 +955,7 @@ export default grammar({
       $._extension,
     ),
 
-    _type: $ => choice(
+    _inline_type: $ => choice(
       $._simple_type,
       alias($._proper_tuple_type, $.tuple_type),
       alias($._labeled_tuple_type, $.tuple_type),
@@ -955,10 +963,12 @@ export default grammar({
       $.aliased_type,
     ),
 
+    _type: $ => $._inline_type,
+
     function_type: $ => seq(
       field('domain', $._argument_type),
       '->',
-      field('codomain', $._type),
+      field('codomain', $._inline_type),
     ),
 
     _argument_type: $ => choice(
