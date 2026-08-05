@@ -23,15 +23,6 @@ export default grammar({
   inline: $ => [
     $._parameter,
     $._argument,
-    $._module_typed,
-    $._typed,
-    $._strictly_polymorphic_typed,
-    $._polymorphic_typed,
-    $._coerced,
-    $._type_constrained,
-    $._polymorphic_type,
-    $._inline_type,
-    $._argument_type,
     $._inline_expression,
     $._extension,
     $._item_extension,
@@ -44,7 +35,6 @@ export default grammar({
     $._simple_module_name,
     $._module_type_name,
     $._simple_constructor_name,
-    $._constructor_name,
     $._constructor_path,
     $._label,
     $._tuple_label,
@@ -53,6 +43,8 @@ export default grammar({
   conflicts: $ => [
     [$._proper_tuple_type, $.labeled_tuple_element_type],
     [$._include_or_include_functor],
+    [$._module_typed, $.functor_type],
+    [$._type, $._argument_type],
   ],
 
   precedences: $ => [
@@ -696,14 +688,14 @@ export default grammar({
       field('module', $._module_expression),
     ),
 
-    functor_type: $ => prec.right(seq(
+    functor_type: $ => prec.dynamic(1, prec.right(seq(
       choice(
         seq(optional('functor'), repeat1($.module_parameter)),
         seq(field('domain', $._module_type), optional($._at_mode)),
       ),
       '->',
       seq(field('codomain', $._module_type), optional($._at_mode)),
-    )),
+    ))),
 
     parenthesized_module_type: $ => parenthesize($._module_type),
 
@@ -952,7 +944,7 @@ export default grammar({
 
     // Types
 
-    _typed: $ => seq(':', field('type', $._inline_type)),
+    _typed: $ => seq(':', field('type', $._type)),
 
     _simple_typed: $ => seq(':', field('type', $._simple_type)),
 
@@ -963,7 +955,7 @@ export default grammar({
       $._strictly_polymorphic_typed,
     ),
 
-    _coerced: $ => seq(':>', field('coercion', $._inline_type)),
+    _coerced: $ => seq(':>', field('coercion', $._type)),
 
     _type_constrained: $ => choice(
       seq($._typed, optional($._coerced)),
@@ -973,7 +965,7 @@ export default grammar({
     _polymorphic_type: $ => seq(
       $.polymorphic_variables,
       '.',
-      field('type', $._inline_type),
+      field('type', $._type),
     ),
 
     polymorphic_variables: $ => choice(
@@ -1006,7 +998,7 @@ export default grammar({
       $._extension,
     ),
 
-    _inline_type: $ => choice(
+    _type: $ => choice(
       $._simple_type,
       alias($._proper_tuple_type, $.tuple_type),
       alias($._labeled_tuple_type, $.tuple_type),
@@ -1014,15 +1006,13 @@ export default grammar({
       $.aliased_type,
     ),
 
-    _type: $ => $._inline_type,
-
-    function_type: $ => prec.right(seq(
+    function_type: $ => prec.dynamic(1, prec.right(seq(
       field('domain', $._argument_type),
       optional($._at_mode),
       '->',
-      field('codomain', $._inline_type),
+      field('codomain', $._type),
       optional($._at_mode),
-    )),
+    ))),
 
     _argument_type: $ => choice(
       $._simple_type,
