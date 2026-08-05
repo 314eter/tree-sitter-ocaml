@@ -434,25 +434,25 @@ let _ = fun x @ mode -> _
   (value_definition
     (let_binding
       pattern: (value_name)
-      (polymorphic_variables
-        (type_variable))
-      type: (type_constructor_path
-        (type_constructor))
+      type: (polymorphic_type
+        (type_variable)
+        type: (type_constructor_path
+          (type_constructor)))
       mode: (mode)
       body: (value_path
         (value_name))))
   (value_definition
     (let_binding
       pattern: (value_name)
-      (polymorphic_variables
+      type: (polymorphic_type
         (abstract_type
-          (type_constructor)))
-      type: (function_type
-        domain: (type_constructor_path
           (type_constructor))
-        mode: (mode)
-        codomain: (type_constructor_path
-          (type_constructor)))
+        type: (function_type
+          domain: (type_constructor_path
+            (type_constructor))
+          mode: (mode)
+          codomain: (type_constructor_path
+            (type_constructor))))
       body: (value_path
         (value_name))))
   (value_definition

@@ -948,7 +948,10 @@ export default grammar({
 
     _simple_typed: $ => seq(':', field('type', $._simple_type)),
 
-    _strictly_polymorphic_typed: $ => seq(':', $._polymorphic_type),
+    _strictly_polymorphic_typed: $ => seq(
+      ':',
+      field('type', alias($._polymorphic_type, $.polymorphic_type)),
+    ),
 
     _polymorphic_typed: $ => choice(
       $._typed,
@@ -963,15 +966,15 @@ export default grammar({
     ),
 
     _polymorphic_type: $ => seq(
-      $.polymorphic_variables,
+      choice(
+        repeat1($.type_variable),
+        alias($._abstract_type, $.abstract_type),
+      ),
       '.',
       field('type', $._type),
     ),
 
-    polymorphic_variables: $ => choice(
-      repeat1($.type_variable),
-      alias($._abstract_type, $.abstract_type),
-    ),
+    _parenthesized_polymorphic_type: $ => parenthesize($._polymorphic_type),
 
     _abstract_type: $ => seq(
       'type',
@@ -1018,7 +1021,7 @@ export default grammar({
       $._simple_type,
       alias($._proper_tuple_type, $.tuple_type),
       $.labeled_argument_type,
-      $.polymorphic_argument_type,
+      alias($._parenthesized_polymorphic_type, $.polymorphic_type),
     ),
 
     labeled_argument_type: $ => seq(
@@ -1027,8 +1030,6 @@ export default grammar({
       ':',
       field('type', $._argument_type),
     ),
-
-    polymorphic_argument_type: $ => parenthesize($._polymorphic_type),
 
     _proper_tuple_type: $ => prec.dynamic(1, seq(
       $._simple_type,

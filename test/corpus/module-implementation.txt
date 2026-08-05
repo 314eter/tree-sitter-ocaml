@@ -52,12 +52,12 @@ let f 'a' .. 'z' = x
   (value_definition
     (let_binding
       pattern: (value_name)
-      (polymorphic_variables
-        (type_variable))
-      type: (constructed_type
+      type: (polymorphic_type
         (type_variable)
-        (type_constructor_path
-          (type_constructor)))
+        type: (constructed_type
+          (type_variable)
+          (type_constructor_path
+            (type_constructor))))
       body: (value_path
         (value_name))))
   (value_definition
@@ -135,28 +135,28 @@ let f 'a' .. 'z' = x
       pattern: (value_name)
       (parameter
         pattern: (value_pattern)
-        (polymorphic_variables
-          (type_variable))
-        type: (type_variable))
+        type: (polymorphic_type
+          (type_variable)
+          type: (type_variable)))
       (parameter
         (label_name)
         pattern: (value_pattern)
-        (polymorphic_variables
-          (type_variable))
-        type: (type_variable))
+        type: (polymorphic_type
+          (type_variable)
+          type: (type_variable)))
       (parameter
         pattern: (value_pattern)
-        (polymorphic_variables
-          (type_variable))
-        type: (type_variable)
+        type: (polymorphic_type
+          (type_variable)
+          type: (type_variable))
         default: (value_path
           (value_name)))
       (parameter
         (label_name)
         pattern: (value_pattern)
-        (polymorphic_variables
-          (type_variable))
-        type: (type_variable)
+        type: (polymorphic_type
+          (type_variable)
+          type: (type_variable))
         default: (value_path
           (value_name)))
       body: (value_path
