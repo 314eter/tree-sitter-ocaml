@@ -1418,7 +1418,7 @@ export default grammar({
       seq(choice('.', '.#'), field('field', $.field_path)),
       seq(
         '.',
-        choice('idx_imm', 'idx_mut'),
+        $._block_access_type,
         parenthesize(field('index', $._sequence_expression)),
       ),
     ),
@@ -2338,6 +2338,11 @@ export default grammar({
     _constructor_name: $ => choice(
       $._simple_constructor_name,
       $._extra_constructor,
+    ),
+
+    _block_access_type: $ => alias(
+      choice($._uppercase_identifier, $._lowercase_identifier),
+      $.block_access_type,
     ),
 
     _extra_constructor: $ => choice(
