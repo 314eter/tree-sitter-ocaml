@@ -1372,32 +1372,31 @@ export default grammar({
       field('field', $.field_path),
     )),
 
-    array_get_expression: $ => prec('dot', seq(
-      field('array', $._simple_expression),
-      '.',
-      optional(field('operator', $.indexing_operator_path)),
+    _indexing_prefix: $ => prec('dot', seq(
+      field('sequence', $._simple_expression),
+      choice('.', $.indexing_operator_path),
+    )),
+
+    array_get_expression: $ => seq(
+      $._indexing_prefix,
       '(',
       field('index', $._sequence_expression),
       ')',
-    )),
+    ),
 
-    string_get_expression: $ => prec('dot', seq(
-      field('string', $._simple_expression),
-      '.',
-      optional(field('operator', $.indexing_operator_path)),
+    string_get_expression: $ => seq(
+      $._indexing_prefix,
       '[',
       field('index', $._sequence_expression),
       ']',
-    )),
+    ),
 
-    bigarray_get_expression: $ => prec('dot', seq(
-      field('array', $._simple_expression),
-      '.',
-      optional(field('operator', $.indexing_operator_path)),
+    bigarray_get_expression: $ => seq(
+      $._indexing_prefix,
       '{',
       field('index', $._sequence_expression),
       '}',
-    )),
+    ),
 
     set_expression: $ => prec('set', seq(
       choice(
@@ -2237,10 +2236,13 @@ export default grammar({
     assign_operator: $ => /:=/,
 
     indexing_operator: $ => token(
-      seq(/[!$%&*+\-/:=>?@^|]/, repeat(OP_CHAR)),
+      seq('.', /[!$%&*+\-/:=>?@^|]/, repeat(OP_CHAR)),
     ),
 
-    indexing_operator_path: $ => path($.module_path, $.indexing_operator),
+    indexing_operator_path: $ => choice(
+      $.indexing_operator,
+      seq('.', $.module_path, $.indexing_operator),
+    ),
 
     let_operator: $ => token(
       seq('let', /[$&*+\-/<=>@^|]/, repeat(OP_CHAR)),
@@ -2273,7 +2275,6 @@ export default grammar({
       $._infix_operator,
       $.hash_operator,
       seq(
-        '.',
         $.indexing_operator,
         choice(
           seq('(', optional(seq(';', '..')), ')'),
