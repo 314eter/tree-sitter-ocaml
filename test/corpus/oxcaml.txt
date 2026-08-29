@@ -78,6 +78,7 @@ Module strengthening
 ===========================
 
 module M : S with M
+module rec M : S with M and M : S
 
 ---
 
@@ -89,7 +90,19 @@ module M : S with M
         module_type: (module_type_path
           (module_type_name))
         (extended_module_path
-          (module_name))))))
+          (module_name)))))
+  (module_definition
+    (module_binding
+      (module_name)
+      module_type: (module_type_constraint
+        module_type: (module_type_path
+          (module_type_name))
+        (extended_module_path
+          (module_name))))
+    (module_binding
+      (module_name)
+      module_type: (module_type_path
+        (module_type_name)))))
 
 ===========================
 Comprehensions

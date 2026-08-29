@@ -604,12 +604,14 @@ export default grammar({
     module_type_constraint: $ => prec.right(seq(
       field('module_type', $._module_type),
       'with',
-      sep1('and', choice(
-        $.constrain_type,
-        $.constrain_module,
-        $.constrain_module_type,
+      choice(
         $.extended_module_path,
-      )),
+        sep1('and', choice(
+          $.constrain_type,
+          $.constrain_module,
+          $.constrain_module_type,
+        )),
+      ),
     )),
 
     constrain_type: $ => seq(
