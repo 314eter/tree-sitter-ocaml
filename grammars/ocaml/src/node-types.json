@@ -1335,16 +1335,6 @@
     "type": "array_get_expression",
     "named": true,
     "fields": {
-      "array": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "_simple_expression",
-            "named": true
-          }
-        ]
-      },
       "index": {
         "multiple": false,
         "required": true,
@@ -1355,16 +1345,26 @@
           }
         ]
       },
-      "operator": {
+      "sequence": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
-            "type": "indexing_operator_path",
+            "type": "_simple_expression",
             "named": true
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "indexing_operator_path",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -1480,16 +1480,6 @@
     "type": "bigarray_get_expression",
     "named": true,
     "fields": {
-      "array": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "_simple_expression",
-            "named": true
-          }
-        ]
-      },
       "index": {
         "multiple": false,
         "required": true,
@@ -1500,16 +1490,26 @@
           }
         ]
       },
-      "operator": {
+      "sequence": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
-            "type": "indexing_operator_path",
+            "type": "_simple_expression",
             "named": true
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "indexing_operator_path",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -1536,6 +1536,16 @@
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "block_access_type",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -5561,17 +5571,7 @@
           }
         ]
       },
-      "operator": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "indexing_operator_path",
-            "named": true
-          }
-        ]
-      },
-      "string": {
+      "sequence": {
         "multiple": false,
         "required": true,
         "types": [
@@ -5581,6 +5581,16 @@
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "indexing_operator_path",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -6489,6 +6499,10 @@
     "named": false
   },
   {
+    "type": "block_access_type",
+    "named": true
+  },
+  {
     "type": "class",
     "named": false
   },
@@ -6588,14 +6602,6 @@
   {
     "type": "hash_operator",
     "named": true
-  },
-  {
-    "type": "idx_imm",
-    "named": false
-  },
-  {
-    "type": "idx_mut",
-    "named": false
   },
   {
     "type": "if",
