@@ -23,6 +23,7 @@ export default grammar({
   inline: $ => [
     $._parameter,
     $._argument,
+    $._type_or_kind_annotated_type_variable,
     $._inline_expression,
     $._extension,
     $._item_extension,
@@ -38,6 +39,9 @@ export default grammar({
     $._constructor_path,
     $._label,
     $._tuple_label,
+    $._mode,
+    $._modality,
+    $._kind_name,
   ],
 
   conflicts: $ => [
@@ -52,6 +56,7 @@ export default grammar({
       $.constructed_type,
       $.hash_type,
       $.parenthesized_type,
+      $.kind_annotated_type_variable,
       $.function_type,
       $.aliased_type,
       $._type,
@@ -96,6 +101,12 @@ export default grammar({
       $._delimited_pattern,
       $._delimited_binding_pattern,
     ],
+    [
+      $._product_kind,
+      $.mod_bounded_kind,
+      $.with_bounded_kind,
+      $._kind,
+    ],
     [$.module_path, $.constructor_path],
   ],
 
@@ -129,6 +140,7 @@ export default grammar({
       'include',
       'inherit',
       'initializer',
+      // 'kind_', // OxCaml
       'lazy',
       'let',
       'match',
@@ -209,6 +221,7 @@ export default grammar({
     $._constant,
     $._signed_constant,
     $._infix_operator,
+    $._kind,
   ],
 
   rules: {
@@ -280,6 +293,7 @@ export default grammar({
       $._local_structure_item,
       $.value_definition,
       $.value_specification,
+      $.kind_definition,
       $.include_module,
     ),
 
@@ -393,6 +407,7 @@ export default grammar({
       choice(
         seq(
           field('name', $.type_constructor),
+          optional($._kind_annotation),
           optional(seq(
             choice('=', ':='),
             choice(
@@ -411,6 +426,7 @@ export default grammar({
         ),
         seq(
           field('name', $.type_constructor),
+          optional($._kind_annotation),
           '=',
           field('body', $.external_declaration),
           repeat($.type_constraint),
@@ -429,12 +445,15 @@ export default grammar({
 
     _type_params: $ => choice(
       $._type_param,
-      parenthesize(sep1(',', $._type_param)),
+      parenthesize(sep1(',', seq(
+        $._type_param,
+        optional($._kind_annotation),
+      ))),
     ),
 
     _type_param: $ => seq(
       repeat(choice('+', '-', '!')),
-      choice($.type_variable, alias('_', $.type_variable)),
+      $._type_variable,
     ),
 
     variant_declaration: $ => choice(
@@ -448,7 +467,7 @@ export default grammar({
         seq('of', $._constructor_argument),
         seq(
           ':',
-          optional(seq(repeat1($.type_variable), '.')),
+          optional(seq(repeat1($._maybe_kind_annotated_type_variable), '.')),
           optional(seq($._constructor_argument, '->')),
           $._simple_type,
         ),
@@ -539,6 +558,14 @@ export default grammar({
       repeat($.item_attribute),
     ),
 
+    kind_definition: $ => seq(
+      'kind_',
+      optional($._attribute),
+      $._kind_name,
+      optional(seq('=', field('body', $._kind))),
+      repeat($.item_attribute),
+    ),
+
     open_module: $ => seq(
       'open',
       optional('!'),
@@ -603,6 +630,7 @@ export default grammar({
       $.exception_definition,
       $.module_definition,
       $.module_type_definition,
+      $.kind_definition,
       $.open_module_signature,
       $.include_module_type,
       $.class_definition,
@@ -665,6 +693,7 @@ export default grammar({
           $.constrain_type,
           $.constrain_module,
           $.constrain_module_type,
+          $.constrain_kind,
         )),
       ),
     )),
@@ -691,6 +720,13 @@ export default grammar({
       $.module_type_path,
       choice('=', ':='),
       field('constraint', $._module_type),
+    )),
+
+    constrain_kind: $ => prec.left(seq(
+      'kind_',
+      $.kind_path,
+      choice('=', ':='),
+      field('constraint', $._kind),
     )),
 
     module_type_of: $ => seq(
@@ -977,7 +1013,7 @@ export default grammar({
 
     _polymorphic_type: $ => seq(
       choice(
-        repeat1($.type_variable),
+        repeat1($._maybe_kind_annotated_type_variable),
         alias($._abstract_type, $.abstract_type),
       ),
       '.',
@@ -988,7 +1024,15 @@ export default grammar({
 
     _abstract_type: $ => seq(
       'type',
-      repeat1($.type_constructor),
+      choice(
+        seq($._new_type, $._kind_annotation),
+        repeat1($._new_type),
+      ),
+    ),
+
+    _new_type: $ => choice(
+      $.type_constructor,
+      parenthesize(seq($.type_constructor, $._kind_annotation)),
     ),
 
     _parenthesized_abstract_type: $ => parenthesize($._abstract_type),
@@ -997,6 +1041,7 @@ export default grammar({
       alias($._unboxed_tuple_type, $.tuple_type),
       $.polymorphic_variant_type,
       $.package_type,
+      $.kind_annotated_type_variable,
       $.parenthesized_type,
     ),
 
@@ -1008,6 +1053,7 @@ export default grammar({
       $.local_open_type,
       $.hash_type,
       $.object_type,
+      $.any_type,
       $._extension,
     ),
 
@@ -1076,7 +1122,7 @@ export default grammar({
     constructed_type: $ => seq(
       choice(
         $._simple_type,
-        parenthesize(sep1(',', $._type)),
+        parenthesize(sep1(',', $._type_or_kind_annotated_type_variable)),
       ),
       $.type_constructor_path,
     ),
@@ -1084,7 +1130,7 @@ export default grammar({
     aliased_type: $ => seq(
       field('type', $._type),
       'as',
-      field('alias', $.type_variable),
+      field('alias', $._maybe_kind_annotated_type_variable),
     ),
 
     local_open_type: $ => seq(
@@ -1121,6 +1167,28 @@ export default grammar({
       field('module_type', $._module_type),
     )),
 
+    _anonymous_kind_annotated_type_variable: $ => seq(
+      choice($._type_variable, 'type'),
+      $._kind_annotation,
+    ),
+
+    kind_annotated_type_variable: $ => parenthesize(
+      $._anonymous_kind_annotated_type_variable,
+    ),
+
+    _maybe_kind_annotated_type_variable: $ => choice(
+      $._type_variable,
+      $.kind_annotated_type_variable,
+    ),
+
+    _type_or_kind_annotated_type_variable: $ => choice(
+      $._type,
+      alias(
+        $._anonymous_kind_annotated_type_variable,
+        $.kind_annotated_type_variable,
+      ),
+    ),
+
     object_type: $ => seq(
       '<',
       optional(choice(
@@ -1144,11 +1212,13 @@ export default grammar({
     hash_type: $ => seq(
       optional(choice(
         $._simple_type,
-        parenthesize(sep1(',', $._type)),
+        parenthesize(sep1(',', $._type_or_kind_annotated_type_variable)),
       )),
       '#',
       $.class_type_path,
     ),
+
+    any_type: $ => '_',
 
     parenthesized_type: $ => parenthesize($._type),
 
@@ -2330,6 +2400,54 @@ export default grammar({
 
     _at_at_modality: $ => seq('@@', field('modality', repeat1($._modality))),
 
+    // Kinds
+
+    _kind_annotation: $ => seq(':', field('kind', $._kind)),
+
+    _kind: $ => choice(
+      $.kind_path,
+      $.mod_bounded_kind,
+      $.with_bounded_kind,
+      $.scannable_axes_kind,
+      $.kind_of_kind,
+      alias($._product_kind, $.product_kind),
+      $.any_kind,
+      $.parenthesized_kind,
+    ),
+
+    mod_bounded_kind: $ => seq(
+      $._kind,
+      'mod',
+      repeat1($._mode),
+    ),
+
+    with_bounded_kind: $ => prec.left(seq(
+      $._kind,
+      'with',
+      $._type,
+      optional($._at_at_modality),
+    )),
+
+    scannable_axes_kind: $ => seq(
+      choice($.kind_path, $.parenthesized_kind),
+      repeat1($._mode),
+    ),
+
+    kind_of_kind: $ => seq(
+      'kind_of_',
+      $._type,
+    ),
+
+    _product_kind: $ => prec.right(seq(
+      $._kind,
+      '&',
+      choice($._product_kind, $._kind),
+    )),
+
+    any_kind: $ => '_',
+
+    parenthesized_kind: $ => parenthesize($._kind),
+
     // Names
 
     _value_name: $ => choice(
@@ -2391,6 +2509,8 @@ export default grammar({
 
     class_type_path: $ => path($.extended_module_path, $._class_type_name),
 
+    kind_path: $ => path($.extended_module_path, $._kind_name),
+
     _label_name: $ => alias($._lowercase_identifier, $.label_name),
     _field_name: $ => alias($._lowercase_identifier, $.field_name),
     _class_name: $ => alias($._lowercase_identifier, $.class_name),
@@ -2403,6 +2523,7 @@ export default grammar({
     _instance_variable_name: $ => alias($._lowercase_identifier, $.instance_variable_name),
     _mode: $ => alias($._lowercase_identifier, $.mode),
     _modality: $ => alias($._lowercase_identifier, $.modality),
+    _kind_name: $ => alias($._lowercase_identifier, $.kind_name),
 
     _simple_module_name: $ => alias($._uppercase_identifier, $.module_name),
     _module_name: $ => choice(
@@ -2425,6 +2546,13 @@ export default grammar({
       $.block_access_type,
     ),
 
+    type_variable: $ => seq(
+      /'/,
+      choice($._lowercase_identifier, $._uppercase_identifier),
+    ),
+
+    _type_variable: $ => choice($.type_variable, '_'),
+
     _extra_constructor: $ => choice(
       $.unit,
       $.boolean,
@@ -2443,7 +2571,6 @@ export default grammar({
     _label: $ => seq(choice('~', '?'), $._label_name),
     _tuple_label: $ => seq('~', $._label_name),
     directive: $ => seq(/#/, choice($._lowercase_identifier, $._uppercase_identifier)),
-    type_variable: $ => seq(/'/, choice($._lowercase_identifier, $._uppercase_identifier)),
     tag: $ => seq(/`/, choice($._lowercase_identifier, $._uppercase_identifier)),
     attribute_id: $ => sep1(/\./, choice(
       reserved('attribute_id', $._lowercase_identifier),

@@ -721,3 +721,160 @@ module rec (M @@ modality) : T @@ modality and N : T @@ modality
       module_type: (module_type_path
         (module_type_name))
       modality: (modality))))
+
+===========================
+Kinds
+===========================
+
+kind_ k = k
+kind_ k = M(M).k & k mod m & k with t
+kind_ k = k m & (k & k) m
+kind_ k = kind_of_ t
+type t : k
+type ('a : k, 'b : k) t : k = A : (_ : k) . t
+module type T = T with kind_ k = k & k with S
+type t = ('a . t) -> t
+type t = ('a : k, 'a : k) t as ('a : k)
+let f (type t : k) (type (t : k) (t : k)) (x : ('a : k) . t) = x
+
+---
+
+(compilation_unit
+  (kind_definition
+    (kind_name)
+    body: (kind_path
+      (kind_name)))
+  (kind_definition
+    (kind_name)
+    body: (with_bounded_kind
+      (product_kind
+        (mod_bounded_kind
+          (product_kind
+            (kind_path
+              (extended_module_path
+                (extended_module_path
+                  (module_name))
+                (extended_module_path
+                  (module_name)))
+              (kind_name))
+            (kind_path
+              (kind_name)))
+          (mode))
+        (kind_path
+          (kind_name)))
+      (type_constructor_path
+        (type_constructor))))
+  (kind_definition
+    (kind_name)
+    body: (product_kind
+      (scannable_axes_kind
+        (kind_path
+          (kind_name))
+        (mode))
+      (scannable_axes_kind
+        (parenthesized_kind
+          (product_kind
+            (kind_path
+              (kind_name))
+            (kind_path
+              (kind_name))))
+        (mode))))
+  (kind_definition
+    (kind_name)
+    body: (kind_of_kind
+      (type_constructor_path
+        (type_constructor))))
+  (type_definition
+    (type_binding
+      name: (type_constructor)
+      kind: (kind_path
+        (kind_name))))
+  (type_definition
+    (type_binding
+      (type_variable)
+      kind: (kind_path
+        (kind_name))
+      (type_variable)
+      kind: (kind_path
+        (kind_name))
+      name: (type_constructor)
+      kind: (kind_path
+        (kind_name))
+      body: (variant_declaration
+        (constructor_declaration
+          (constructor_name)
+          (kind_annotated_type_variable
+            kind: (kind_path
+              (kind_name)))
+          (type_constructor_path
+            (type_constructor))))))
+  (module_type_definition
+    (module_type_name)
+    body: (module_type_constraint
+      module_type: (module_type_constraint
+        module_type: (module_type_path
+          (module_type_name))
+        (constrain_kind
+          (kind_path
+            (kind_name))
+          constraint: (product_kind
+            (kind_path
+              (kind_name))
+            (kind_path
+              (kind_name)))))
+      (extended_module_path
+        (module_name))))
+  (type_definition
+    (type_binding
+      name: (type_constructor)
+      body: (function_type
+        domain: (polymorphic_type
+          (type_variable)
+          type: (type_constructor_path
+            (type_constructor)))
+        codomain: (type_constructor_path
+          (type_constructor)))))
+  (type_definition
+    (type_binding
+      name: (type_constructor)
+      body: (aliased_type
+        type: (constructed_type
+          (kind_annotated_type_variable
+            (type_variable)
+            kind: (kind_path
+              (kind_name)))
+          (kind_annotated_type_variable
+            (type_variable)
+            kind: (kind_path
+              (kind_name)))
+          (type_constructor_path
+            (type_constructor)))
+        alias: (kind_annotated_type_variable
+          (type_variable)
+          kind: (kind_path
+            (kind_name))))))
+  (value_definition
+    (let_binding
+      pattern: (value_name)
+      (abstract_type
+        (type_constructor)
+        kind: (kind_path
+          (kind_name)))
+      (abstract_type
+        (type_constructor)
+        kind: (kind_path
+          (kind_name))
+        (type_constructor)
+        kind: (kind_path
+          (kind_name)))
+      (parameter
+        pattern: (value_pattern)
+        type: (polymorphic_type
+          (kind_annotated_type_variable
+            (type_variable)
+            kind: (kind_path
+              (kind_name)))
+          type: (type_constructor_path
+            (type_constructor))))
+      body: (value_path
+        (value_name)))))
