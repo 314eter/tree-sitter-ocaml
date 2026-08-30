@@ -296,6 +296,7 @@ x.y.z <- x;;
 x.(0).[0].{0,0} <- x;;
 x.%(0).M.%(0) <- x;;
 1 #? x.%(0);;
+X.%(0);;
 
 ---
 
@@ -315,9 +316,9 @@ x.%(0).M.%(0) <- x;;
   (expression_item
     (set_expression
       (bigarray_get_expression
-        array: (string_get_expression
-          string: (array_get_expression
-            array: (value_path
+        sequence: (string_get_expression
+          sequence: (array_get_expression
+            sequence: (value_path
               (value_name))
             index: (number))
           index: (number))
@@ -329,13 +330,13 @@ x.%(0).M.%(0) <- x;;
   (expression_item
     (set_expression
       (array_get_expression
-        array: (array_get_expression
-          array: (value_path
+        sequence: (array_get_expression
+          sequence: (value_path
             (value_name))
-          operator: (indexing_operator_path
+          (indexing_operator_path
             (indexing_operator))
           index: (number))
-        operator: (indexing_operator_path
+        (indexing_operator_path
           (module_path
             (module_name))
           (indexing_operator))
@@ -347,11 +348,18 @@ x.%(0).M.%(0) <- x;;
       left: (number)
       operator: (hash_operator)
       right: (array_get_expression
-        array: (value_path
+        sequence: (value_path
           (value_name))
-        operator: (indexing_operator_path
+        (indexing_operator_path
           (indexing_operator))
-        index: (number)))))
+        index: (number))))
+  (expression_item
+    (array_get_expression
+      sequence: (constructor_path
+        (constructor_name))
+      (indexing_operator_path
+        (indexing_operator))
+      index: (number))))
 
 ===========================
 Local opens
