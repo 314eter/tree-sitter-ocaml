@@ -374,3 +374,21 @@ type ('a, 'b) t = A of global_ 'a * 'b
           (constructor_name)
           (type_variable)
           (type_variable))))))
+
+===========================
+Let mutable
+===========================
+
+let mutable x = 0 in x
+
+---
+
+(compilation_unit
+  (expression_item
+    (let_expression
+      (value_definition
+        (let_binding
+          pattern: (value_name)
+          body: (number)))
+      body: (value_path
+        (value_name)))))

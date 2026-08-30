@@ -280,7 +280,15 @@ export default grammar({
     ),
 
     value_definition: $ => seq(
-      choice(seq('let', optional($._attribute), optional('rec')), $.let_operator),
+      choice(
+        seq(
+          'let',
+          optional($._attribute),
+          optional('mutable'),
+          optional('rec'),
+        ),
+        $.let_operator,
+      ),
       sep1(choice('and', $.let_and_operator), $.let_binding),
     ),
 

@@ -339,6 +339,18 @@
                   "members": [
                     {
                       "type": "STRING",
+                      "value": "mutable"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
                       "value": "rec"
                     },
                     {
